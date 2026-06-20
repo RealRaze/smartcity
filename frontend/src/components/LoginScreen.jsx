@@ -8,11 +8,13 @@ export default function LoginScreen({ onLogin }) {
   const [explorerType, setExplorerType] = useState('tourist');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     setError('');
+    setIsLoading(true);
 
     const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -54,6 +56,8 @@ export default function LoginScreen({ onLogin }) {
     } catch (err) {
       console.error(err);
       setError('Network error. Is the backend running?');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -166,8 +170,8 @@ export default function LoginScreen({ onLogin }) {
             </>
           )}
 
-          <button type="submit" className="btn-primary" style={{ marginTop: '10px', fontSize: '14px', padding: '16px' }}>
-            {isRegistering ? 'SIGN UP' : 'ENTER CITY'}
+          <button type="submit" className="btn-primary" style={{ marginTop: '10px', fontSize: '14px', padding: '16px' }} disabled={isLoading}>
+            {isLoading ? 'WAKING UP BACKEND... (MIGHT TAKE 50S)' : (isRegistering ? 'SIGN UP' : 'ENTER CITY')}
           </button>
         </form>
 
