@@ -70,7 +70,7 @@ const outerBounds = [
   [-85, 180],
 ];
 
-export default function MapComponent({ currentLocation, mapData, theme }) {
+export default function MapComponent({ currentLocation, mapData, theme, activeLandmark }) {
   // Leaflet doesn't auto-recenter when currentLocation changes like GMaps did out-of-the-box easily without an effect hook, 
   // but for a simple prototype, passing center to MapContainer is fine (it only centers on mount).
   const center = currentLocation ? [currentLocation.lat, currentLocation.lng] : [18.4636, 73.8682]; // VIT Pune
@@ -84,15 +84,7 @@ export default function MapComponent({ currentLocation, mapData, theme }) {
     semiHoles.push(generateCircleHole(currentLocation.lat, currentLocation.lng, 0.005)); // Small hole in inner semi-transparent fog
   }
   
-  if (mapData?.locations) {
-    mapData.locations.forEach(loc => {
-      // Create holes around unlocked locations
-      if (loc.status !== "locked") {
-        thickHoles.push(generateCircleHole(loc.geometry.coordinates[1], loc.geometry.coordinates[0], 0.02));
-        semiHoles.push(generateCircleHole(loc.geometry.coordinates[1], loc.geometry.coordinates[0], 0.005));
-      }
-    });
-  }
+
 
   // In Leaflet, a polygon with holes is an array where the first element is the outer ring, and subsequent elements are holes.
   const thickPaths = [outerBounds, ...thickHoles];
@@ -104,9 +96,9 @@ export default function MapComponent({ currentLocation, mapData, theme }) {
 
   const dynamicThickFogOptions = {
     ...baseThickFogOptions,
-    fillColor: theme === 'dark' ? '#334155' : '#94a3b8', // Dark gray for dark mode, solid gray for light mode (contrasts with map)
+    fillColor: theme === 'dark' ? '#334155' : '#94a3b8',
     fillOpacity: 0.95,
-    color: theme === 'dark' ? '#475569' : '#cbd5e1', // fuzzy border color
+    color: theme === 'dark' ? '#475569' : '#cbd5e1',
   };
 
   const dynamicSemiFogOptions = {
@@ -116,7 +108,7 @@ export default function MapComponent({ currentLocation, mapData, theme }) {
   };
 
   return (
-    <div className="map-container" style={{ width: '100%', height: '100%' }}>
+    <div className="map-container" style={{ width: '100%', height: '100%', position: 'relative' }}>
       <MapContainer 
         center={center} 
         zoom={15} 
@@ -165,7 +157,7 @@ export default function MapComponent({ currentLocation, mapData, theme }) {
               icon={icon}
               opacity={opacity}
             >
-              {loc.status !== 'locked' && (
+              {(loc.status !== 'locked' && activeLandmark && loc.id === activeLandmark.id) && (
                 <Tooltip permanent direction="top" offset={[0, -12]} className="retro-tooltip">
                   {loc.name}
                 </Tooltip>

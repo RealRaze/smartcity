@@ -26,6 +26,9 @@ export default function CivicReportingModal({ isOpen, onClose, currentLocation, 
       setDescription('');
       onSuccess();
       onClose();
+      
+      // Redirect to Pune Municipality (PMC Care) portal
+      window.open('https://pmc.gov.in/en/ptckms', '_blank');
     } catch (err) {
       console.error("Failed to submit report:", err);
       alert("Failed to submit report.");

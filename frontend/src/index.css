@@ -46,6 +46,12 @@ body {
   line-height: 1.6;
 }
 
+#root {
+  width: 100%;
+  max-width: 100vw;
+  overflow: hidden;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
   margin-bottom: 8px;
@@ -128,7 +134,8 @@ h3 { font-size: 12px; }
 
 /* Layout Wrapper */
 .retro-frame {
-  width: 100vw;
+  width: 100%;
+  max-width: 100vw;
   height: 100vh;
   padding: 16px;
   background-color: #8c5b36; /* Wooden border frame */
@@ -136,14 +143,52 @@ h3 { font-size: 12px; }
   box-shadow: inset -8px -8px 0px 0px rgba(0,0,0,0.5), inset 8px 8px 0px 0px rgba(255,255,255,0.2);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-.app-container {
-  position: relative;
+.dashboard-container {
+  background-color: #0b1021; /* Very dark blue */
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+  flex: 1; /* Was min-height: 100vh, changed to flex to fit inside retro-frame */
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.top-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #334155;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  color: var(--text-yellow);
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) 1fr minmax(200px, 280px); /* Responsive columns to prevent cutoff */
+  gap: 16px;
   flex: 1;
-  border: 8px solid #d4af37; /* Gold inner border */
-  box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5), inset 4px 4px 0px 0px #ffdf73, 0 0 0 4px #000;
-  background-color: var(--bg-primary);
+  min-height: 0; /* allows children to scroll if needed */
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.map-column {
+  border: 4px solid var(--text-yellow); /* Gold border for map */
+  position: relative;
+  background-color: var(--bg-panel);
   overflow: hidden;
 }
 
@@ -153,48 +198,46 @@ h3 { font-size: 12px; }
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 999;
+  z-index: 100;
+}
+
+/* Base App container just spans full screen now */
+.app-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bg-primary);
 }
 
 /* Retro Tooltips */
 .leaflet-tooltip.retro-tooltip {
-  background-color: var(--panel-bg);
-  border: 2px solid var(--border-color);
-  color: var(--text-color);
+  background-color: var(--bg-panel);
+  border: 2px solid var(--border-dark);
+  color: var(--text-primary);
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
   padding: 4px 6px;
   border-radius: 0;
-  box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+  box-shadow: var(--retro-shadow);
   white-space: nowrap;
 }
 
 .leaflet-tooltip-top.retro-tooltip:before {
-  border-top-color: var(--border-color);
+  border-top-color: var(--border-dark);
 }
 .leaflet-tooltip-bottom.retro-tooltip:before {
-  border-bottom-color: var(--border-color);
+  border-bottom-color: var(--border-dark);
 }
 .leaflet-tooltip-left.retro-tooltip:before {
-  border-left-color: var(--border-color);
+  border-left-color: var(--border-dark);
 }
 .leaflet-tooltip-right.retro-tooltip:before {
-  border-right-color: var(--border-color);
+  border-right-color: var(--border-dark);
 }
 
-.hud-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
-  pointer-events: none;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-}
-
+/* Removed old hud-container and hud-element positioners */
 .hud-element {
   pointer-events: auto;
 }
@@ -271,7 +314,7 @@ h3 { font-size: 12px; }
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.8);
-  z-index: 100;
+  z-index: 3000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -365,4 +408,100 @@ textarea.form-control {
 .cloud-fog {
   filter: blur(12px);
   transition: all 1s ease;
+}
+
+/* Flying XP Animation */
+.flying-xp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: var(--text-yellow);
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: var(--retro-shadow);
+  z-index: 2000;
+  pointer-events: none;
+  animation: flyToBar 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes flyToBar {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(-50%, -100px) scale(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(300px, -400px) scale(0.5); /* Approximate path to right sidebar */
+    opacity: 0;
+  }
+}
+
+/* Login Screen */
+.login-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-dark);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5000;
+  padding: 20px;
+}
+
+.login-panel {
+  width: 100%;
+  max-width: 500px;
+  border-width: 8px;
+  padding: 30px;
+}
+
+.type-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.type-option {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: 4px solid var(--border-dark);
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.type-option:hover {
+  background: rgba(250, 219, 42, 0.1);
+  border-color: var(--border-light);
+}
+
+.type-option.selected {
+  background: rgba(250, 219, 42, 0.2);
+  border-color: var(--text-yellow);
+}
+
+.type-icon {
+  font-size: 24px;
+  margin-right: 16px;
+}
+
+.type-details h4 {
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  font-size: 12px;
+}
+
+.type-details p {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 8px;
+  line-height: 1.4;
 }

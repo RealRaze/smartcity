@@ -5,10 +5,77 @@ from datetime import datetime
 from bson import ObjectId
 
 from app.database import get_db
-from app.models.schemas import LocationPing, User, LocationBase, CivicReportBase
+from app.models.schemas import LocationPing, User, LocationBase, CivicReportBase, UserCreate, UserLogin
 from app.core.logic import calculate_speed, calculate_xp_and_badges, MAX_PEDESTRIAN_SPEED_MPS, UNLOCK_RADIUS_METERS, VALIDATION_RADIUS_METERS, VALIDATION_THRESHOLD
+from app.core.security import get_password_hash, verify_password, create_access_token, create_email_verification_token, verify_token
+from app.core.email import send_verification_email
 
 router = APIRouter()
+
+# --- Authentication & Registration ---
+@router.post("/auth/register")
+async def register_user(user_data: UserCreate):
+    db = get_db()
+    existing_user = await db.users.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+        
+    user_doc = user_data.dict(exclude={"password"})
+    user_doc["_id"] = str(ObjectId())
+    user_doc["hashed_password"] = get_password_hash(user_data.password)
+    user_doc["is_verified"] = False
+    user_doc["location_history"] = []
+    user_doc["xp"] = 0
+    user_doc["badges"] = []
+    user_doc["unlocked_locations"] = []
+    user_doc["created_at"] = datetime.utcnow()
+    
+    await db.users.insert_one(user_doc)
+    
+    token = create_email_verification_token(user_data.email)
+    send_verification_email(user_data.email, token)
+    
+    return {"status": "success", "message": "User registered. Please check your email to verify."}
+
+@router.get("/auth/verify-email")
+async def verify_email(token: str):
+    payload = verify_token(token)
+    if not payload or payload.get("type") != "email_verification":
+        raise HTTPException(status_code=400, detail="Invalid or expired verification token")
+        
+    email = payload.get("sub")
+    db = get_db()
+    user = await db.users.find_one({"email": email})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if user.get("is_verified"):
+        return {"status": "success", "message": "Email already verified"}
+        
+    await db.users.update_one({"email": email}, {"$set": {"is_verified": True}})
+    return {"status": "success", "message": "Email verified successfully!"}
+
+@router.post("/auth/login")
+async def login_user(login_data: UserLogin):
+    db = get_db()
+    user = await db.users.find_one({"email": login_data.email})
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+    if not verify_password(login_data.password, user["hashed_password"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+    if not user.get("is_verified"):
+        raise HTTPException(status_code=403, detail="Please verify your email address before logging in")
+        
+    access_token = create_access_token(data={"sub": user["_id"]})
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_id": user["_id"],
+        "username": user["username"],
+        "explorer_type": user.get("explorer_type", "tourist")
+    }
 
 # --- Map Data & Fog of War ---
 @router.get("/map/data")
