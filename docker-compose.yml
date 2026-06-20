@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: citytrail_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb+srv://anmol1251070912_db_user:smartcity12345@smartcity.grtp3i3.mongodb.net/
+      - DB_NAME=citytrail
+      - JWT_SECRET=37109b6f68bfd3d978f75476f7d26568da0ea578bc92dbf57f6061b7e3cbcf21
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    container_name: citytrail_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
