@@ -107,15 +107,15 @@ export default function HUDComponent({ user, children, onReportClick, onSuggestC
             <ul style={{ listStyle: 'none', fontSize: 10, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {user.badges && user.badges.length > 0 ? (
                 user.badges.map((badge, idx) => (
-                  <li key={idx} style={{ backgroundColor: 'rgba(0,0,0,0.3)', padding: '12px', border: '2px solid #334155' }}>🏆 {badge.name}</li>
+                  <li key={idx} style={{ backgroundColor: 'rgba(0,0,0,0.3)', padding: '12px', border: '2px solid #334155', wordBreak: 'break-word' }}>🏆 {typeof badge === 'string' ? badge : badge.name}</li>
                 ))
               ) : (
                 <li style={{ color: 'var(--text-secondary)' }}>NONE YET</li>
               )}
               {(!user.badges || user.badges.length === 0) && (
                 <>
-                  <li style={{ backgroundColor: 'rgba(0,0,0,0.3)', padding: '12px', border: '2px solid #334155', display: 'flex', alignItems: 'center', gap: '12px' }}><span style={{ fontSize: 16 }}>☕</span> HIDDEN CAFE</li>
-                  <li style={{ backgroundColor: 'rgba(0,0,0,0.3)', padding: '12px', border: '2px solid #334155', display: 'flex', alignItems: 'center', gap: '12px' }}><span style={{ fontSize: 16 }}>👢</span> CITY WANDERER</li>
+                  <li style={{ backgroundColor: 'rgba(0,0,0,0.3)', padding: '12px', border: '2px solid #334155', display: 'flex', alignItems: 'center', gap: '12px', wordBreak: 'break-word' }}><span style={{ fontSize: 16 }}>☕</span> HIDDEN CAFE</li>
+                  <li style={{ backgroundColor: 'rgba(0,0,0,0.3)', padding: '12px', border: '2px solid #334155', display: 'flex', alignItems: 'center', gap: '12px', wordBreak: 'break-word' }}><span style={{ fontSize: 16 }}>👢</span> CITY WANDERER</li>
                 </>
               )}
             </ul>
@@ -125,16 +125,16 @@ export default function HUDComponent({ user, children, onReportClick, onSuggestC
             <h3 style={{ fontSize: 10, color: 'var(--accent-cyan)', marginBottom: 12 }}>TOP EXPLORERS</h3>
             <ul className="leaderboard-list">
               <li className="leaderboard-item">
-                <span className="rank" style={{ color: 'var(--text-yellow)' }}>1 👑 NAME</span> <span>3009</span>
+                <span className="rank" style={{ color: 'var(--text-yellow)' }}>1 👑 ARJUN</span> <span>3009</span>
               </li>
               <li className="leaderboard-item">
-                <span className="rank">2 GARON</span> <span>2595</span>
+                <span className="rank">2 ROHIT</span> <span>2595</span>
               </li>
               <li className="leaderboard-item">
-                <span className="rank">3 VIRE</span> <span>2000</span>
+                <span className="rank">3 PRIYA</span> <span>2000</span>
               </li>
               <li className="leaderboard-item" style={{borderBottom: 'none'}}>
-                <span className="rank">4 CHANET</span> <span>1808</span>
+                <span className="rank">4 SNEHA</span> <span>1808</span>
               </li>
             </ul>
           </div>
